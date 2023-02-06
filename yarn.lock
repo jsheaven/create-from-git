@@ -656,10 +656,10 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@jsheaven/easybuild@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@jsheaven/easybuild/-/easybuild-1.1.0.tgz#500bc09382d9770922f2ba1fd651a87e1b256470"
-  integrity sha512-XswkkPvCX8RC2BpoyU2QAGF7iZ92msUThP4Cp6nLEH0RyvPnze6J1hI4dlgCrdYnC5GOj591uygva44r9eCVLQ==
+"@jsheaven/easybuild@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@jsheaven/easybuild/-/easybuild-1.1.1.tgz#fd677184c0960a78a41ffd483c4a2dc044d653f9"
+  integrity sha512-ODiF6HZuJNmxTM30Dcp9gt9aNDY5QFDWQxvwLOB6mFr8I7O0UdiUqOrBK9dGdNufTWoxWi11wT0W2DSxkq/Hbg==
   dependencies:
     brotli-size "^4.0.0"
     esbuild "^0.17.6"
