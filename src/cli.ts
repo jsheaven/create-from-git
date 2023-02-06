@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 'use strict'
 
-console.log('[create-from-git] Scaffolding a new project for you...')
-
 import * as colors from 'kleur/colors'
 import yargs from 'yargs-parser'
 import { clean } from './clean'
