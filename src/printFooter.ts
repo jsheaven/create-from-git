@@ -1,0 +1,27 @@
+import * as colors from 'kleur/colors'
+
+export const printFooter = (documentationUrl: string, projectPath: string, issueUrl: string) => {
+  console.log('')
+  console.log(colors.green(`Thank you for using ${colors.bold(colors.yellow('VANIL'))}!`))
+  console.log('')
+  console.log('If you are unfamiliar with Vanil, please head on to: 👩‍💻👨‍💻')
+  console.log(`${colors.green(documentationUrl)}`)
+  console.log('')
+  console.log("We hope you'll have a great time with this! 🤩")
+  console.log()
+  console.log('In case something goes 💩, please file a bug report:')
+  console.log(`${colors.green(issueUrl)}`)
+  console.log()
+  console.log(colors.yellow('🚀 We are highly motivated to help! 🚀'))
+  console.log()
+  console.log('The project has been created in:')
+  console.log('')
+  console.log(`    ${colors.green(`cd ${projectPath}`)}`)
+  console.log('')
+  console.log('Just run:')
+  console.log('')
+  console.log(`    ${colors.green(`npm run dev`)}`)
+  console.log('')
+  console.log(colors.bold('Have a lot of fun!'))
+  console.log('')
+}

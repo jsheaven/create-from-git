@@ -1,0 +1,62 @@
+{
+  "name": "create-from-git",
+  "version": "0.0.1",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "create-from-git": "./cli.js"
+  },
+  "license": "MIT",
+  "description": "Scaffolds a new project using `git checkout` and smart, in-file string replacements. Comes with an API and CLI: `npx create-from-git`. Runs on Mac, Windows and Linux.",
+  "keywords": [
+    "scaffolding",
+    "library",
+    "API",
+    "CLI"
+  ],
+  "repository": {
+    "url": "git+https://github.com/jsheaven/create-from-git.git",
+    "type": "git"
+  },
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --verbose --coverage ./test/*.test.ts",
+    "prebuild": "rm -rf ./dist",
+    "build": "esbuild ./src/index.ts --platform=node --minify --outfile=./dist/index.mjs --format=esm --sourcemap && esbuild ./src/index.ts--platform=node --minify --outfile=./dist/index.js --format=cjs --sourcemap && tsc ./src/index.ts --declaration --emitDeclarationOnly --declarationDir './dist' --moduleResolution node --target es2015 && esbuild ./src/cli.ts --minify --outfile=./dist/cli.js --format=cjs --sourcemap --platform=node",
+    "postbuild": "cp ./dist/index.d.ts ./dist/index.mjs.d.ts && gzip-size ./dist/index.mjs --include-original"
+  },
+  "author": "Aron Homberg <info@aron-homberg.de>",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "main": "./src/cli.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/jest": "^29.4.0",
+    "brotli-size": "^4.0.0",
+    "bundle-require": "^3.1.2",
+    "esbuild": "^0.17.5",
+    "gzip-size": "^7.0.0",
+    "gzip-size-cli": "^5.1.0",
+    "jest": "^29.4.1",
+    "microbundle": "^0.15.1",
+    "pretty-bytes": "^6.1.0",
+    "ts-jest": "next",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "cross-spawn": "^7.0.3",
+    "fast-glob": "^3.2.12",
+    "inquirer": "^9.1.4",
+    "kleur": "^4.1.5",
+    "validate-npm-package-name": "^5.0.0"
+  }
+}
