@@ -1,7 +1,7 @@
 import { mkdirSync, readdirSync } from 'fs'
 import * as colors from 'kleur/colors'
 import { join } from 'path'
-import { removeRecursiveForce } from './folder'
+import { removeRecursiveForce, toRelativePath } from './folder'
 
 export const ignoredPaths = [
   '.DS_Store',
@@ -37,14 +37,14 @@ export const createProjectFolder = (
     return false
   }
 
-  console.log(`Creating a new Vanil project in ${colors.green(projectPath)}.`)
+  console.log(`Creating a new project in ${colors.green(toRelativePath(projectPath, process.cwd()))}.`)
 
   return true
 }
 
-export const isSafeToCreateAppIn = async (rootPath: string, name: string) => {
+export const isSafeToCreateAppIn = async (projectPath: string, name: string) => {
   console.log()
-  const conflicts = readdirSync(rootPath)
+  const conflicts = readdirSync(projectPath)
     .filter((file: string) => !ignoredPaths.includes(file))
     // IntelliJ IDEA creates module files before CRA is launched
     .filter((file: string) => !/\.iml$/.test(file))
@@ -52,23 +52,27 @@ export const isSafeToCreateAppIn = async (rootPath: string, name: string) => {
     .filter((file: string) => !logFiles.some((pattern) => file.indexOf(pattern) === 0))
 
   if (conflicts.length > 0) {
-    console.log(`The directory ${colors.green(name)} contains files that could conflict:`)
+    console.log(
+      `${colors.bold(colors.white(colors.bgRed('[!!] FATAL')))}: The folder ${colors.green(
+        projectPath,
+      )} contains conflicting files:`,
+    )
     console.log()
     for (const file of conflicts) {
       console.log(colors.red(`  ${file}`))
     }
     console.log()
-    console.log('Either try using a new directory name, or remove the files listed above.')
+    console.log('Either try a different project name, a different output folder or remove the conflicting files.')
 
     process.exit(1)
   }
 
   // Remove any remnant files from a previous installation
-  const currentFiles = readdirSync(join(rootPath))
+  const currentFiles = readdirSync(join(projectPath))
   for (let i = 0; i < currentFiles.length; i++) {
     const file = currentFiles[i]
     if (logFiles.find((errorLogFilePattern: string) => file.indexOf(errorLogFilePattern) === 0)) {
-      removeRecursiveForce(join(rootPath, file))
+      removeRecursiveForce(join(projectPath, file))
     }
   }
   return true

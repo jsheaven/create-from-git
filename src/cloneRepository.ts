@@ -1,8 +1,8 @@
 import { execSync } from 'child_process'
-import { ensureDir } from './folder'
+import { ensureDir, makeTempDir } from './folder'
 
 export const cloneRepository = async (url: string): Promise<string> => {
-  const cloneDir = '.clone'
+  const cloneDir = makeTempDir()
 
   execSync(`rm -rf ${cloneDir}`, {
     stdio: 'inherit',

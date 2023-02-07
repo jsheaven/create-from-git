@@ -3,10 +3,6 @@
 
 import * as colors from 'kleur/colors'
 import yargs from 'yargs-parser'
-import { clean } from './clean'
-import { getPackageJson } from './file'
-import { resolve, parse } from 'path'
-import { fileURLToPath } from 'url'
 import { createFromGit } from './createFromGit'
 import { getOwnVersion } from './version'
 
@@ -15,29 +11,26 @@ export type Arguments = yargs.Arguments
 export enum Commands {
   HELP = 'help',
   VERSION = 'version',
-  CLEAN = 'clean',
   SCAFFOLD = 'scaffold',
 }
 
-export type Command = 'help' | 'version' | 'clean' | 'scaffold'
+export type Command = 'help' | 'version' | 'scaffold'
 
 export interface CLIState {
   cmd: Command
   options: {
-    tpl?: string
-    outputDirectory?: string
+    from?: string
+    to?: string
     projectName?: string
   }
 }
 
 /** Determine which action the user requested */
 export const resolveArgs = (flags: Arguments): CLIState => {
-  console.log('flags', flags)
-
   const options: CLIState['options'] = {
-    tpl: typeof flags.tpl === 'string' ? flags.tpl : undefined,
-    outputDirectory: typeof flags.o === 'string' ? flags.o : undefined,
-    projectName: typeof flags.n === 'string' ? flags.n : undefined,
+    from: typeof flags.from === 'string' ? flags.from : undefined,
+    to: typeof flags.to === 'string' ? flags.to : undefined,
+    projectName: typeof flags.name === 'string' ? flags.name : undefined,
   }
 
   if (flags.version) {
@@ -48,8 +41,6 @@ export const resolveArgs = (flags: Arguments): CLIState => {
 
   const cmd: Command = flags._[2] as Command
   switch (cmd) {
-    case 'clean':
-      return { cmd: 'clean', options }
     default:
       return { cmd: 'scaffold', options }
   }
@@ -57,38 +48,26 @@ export const resolveArgs = (flags: Arguments): CLIState => {
 
 /** Display --help flag */
 const printHelp = () => {
-  console.error(`  ${colors.bold('Vanil')} - a solid site generator
+  console.error(`  ${colors.bold('create-from-git')} - a project scaffolder
   ${colors.bold('Commands:')}
-  run dev             Run in development mode (live-reload).
-  run build           Build a pre-compiled production version of your site.
-  run preview         Preview your build locally before deploying.
-  run config          Prints the final config and explains how to customize it.
-  run clean           Removes the dist folder of your site; this cleans the cache.
-  run init <dir>      Scaffolds a new project in <dir>.
+  run version          Show the program version.
+  run help             Show this help message.
+  run scaffold         Create a new project from template folder or git repository URL.
   ${colors.bold('Flags:')}
-  --prod                Run in production mode.
-  --port <number>       Specify port to serve on (dev, preview only).
-  --project-root <path> Specify the path to the project root folder, relative to CWD.
-  --site <uri>          Specify site to use as site location.
-  --use-tls             Enables https:// for all URIs.
-  --dist                Specify the distribution folder (build result).
-  --hostname <string>   Specify hostname to serve on (dev, preview only).
-  --no-sitemap          Disable sitemap generation (build only).
+  --name <projectName>  Name of your new project [Default: prompted] (./$projectName/*)
+  --from <gitUrl|path>  URL to a git repository or path to a folder on disk
+  --to <outDir>         Output folder to save the new project in [Default: .] (./$outDir/$projectName/*)
   --version             Show the version number and exit.
   --help                Show this help message.
-  ${colors.bold('For creating new projects (run init):')}
-  --name <project-name> Name of the project (only useful with "init").
-  --tpl <dir-or-repo>   Path to a template folder or git repository.
+
+  Example call:
+  npx create-from-git --from https://github.com/jsheaven/runtime-info --name MyRuntimeInfo
 `)
 }
 
 /** display --version flag */
 const printVersion = async () => {
   console.log((await getOwnVersion()).version)
-}
-
-export const callCleanCommand = async (outputDirectory: string) => {
-  await clean(outputDirectory)
 }
 
 /** The primary CLI action */
@@ -116,7 +95,11 @@ export const cli = async (args: string[]) => {
     }
     case 'scaffold': {
       try {
-        await createFromGit(options.tpl, options.outputDirectory, options.projectName)
+        await createFromGit({
+          from: options.from,
+          projectName: options.projectName,
+          to: options.to,
+        })
       } catch (e) {
         throwAndExit(e)
       }

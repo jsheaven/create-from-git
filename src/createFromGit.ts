@@ -9,24 +9,32 @@ import { cloneRepository } from './cloneRepository'
 import { validateProjectDirectoryInput } from './validateProjectDirectoryInput'
 import { installModules } from './installModules'
 import { copyTemplate } from './copyTemplate'
-//import { fileURLToPath } from 'url'
-import { getOwnVersion } from './version'
+import { toRelativePath } from './folder'
 
-//const __dirname = dirname(fileURLToPath(import.meta.url))
+export interface CreateFromGitConfig {
+  /** git URL or folder path on disk */
+  from: string
+  /** folder to write too (subfolder) */
+  to: string
+  /** new projects name */
+  projectName: string
+}
 
 /** creates a new project from a template named (default: examples/init), given a projectName */
-export const createFromGit = async (tplDir: string, projectName?: string, outputDir: string = '.') => {
-  if (!tplDir) {
-    console.log(colors.yellow('[??] FATAL: No template path/git repo specified. Add: --tpl $pathToTplOrGitRepo'))
+export const createFromGit = async ({ from, to, projectName }: CreateFromGitConfig) => {
+  if (!to) to = '.'
+
+  if (!from) {
+    console.log(colors.yellow('[??] FATAL: No template path/git repo specified. Add: --from $pathToTplOrGitRepo'))
     process.exit(1)
   }
 
-  const isGitRepo = tplDir.startsWith('http')
+  const isGitRepo = from.startsWith('http')
 
   if (isGitRepo) {
-    tplDir = await cloneRepository(tplDir)
-  } else if (!existsSync(tplDir)) {
-    console.log(colors.red(`[!!] Error: The template ${tplDir} doesn't exist. Exiting.`))
+    from = await cloneRepository(from)
+  } else if (!existsSync(from)) {
+    console.log(colors.red(`[!!] Error: The template ${from} doesn't exist. Exiting.`))
     process.exit(1)
   }
 
@@ -45,18 +53,18 @@ export const createFromGit = async (tplDir: string, projectName?: string, output
   }
 
   const projectPathName = projectName!.toLowerCase()
-  const projectPath = resolve(outputDir, projectPathName)
+  const projectPath = resolve(to, projectPathName)
   const folderAlreadyExist = existsSync(projectPath)
 
   if (folderAlreadyExist) {
     const shouldOverride = await inquirer.default.prompt([
       {
         type: 'confirm',
-        default: false,
+        default: true,
         name: 'answer',
-        message: colors.yellow(
-          `[??] WARN: The output directory ${projectPath} already exists. Do you want to override it?`,
-        ),
+        message: `${colors.bold(colors.yellow(`[??] WARN`))}: The output directory ${colors.green(
+          toRelativePath(projectPath, process.cwd()),
+        )} already exists. Merge it?`,
       },
     ])
 
@@ -74,18 +82,18 @@ export const createFromGit = async (tplDir: string, projectName?: string, output
   let canInstallModules = false
   try {
     const packageJSON: { dependencies: any; devDependencies: any } = JSON.parse(
-      readFileSync(join(tplDir, 'package.json'), { encoding: 'utf8' }),
+      readFileSync(join(from, 'package.json'), { encoding: 'utf8' }),
     )
     dependenciesAsString = transformPackageDependenciesToStrings(packageJSON, 'dependencies')
     devDependenciesAsString = transformPackageDependenciesToStrings(packageJSON, 'devDependencies')
     canInstallModules = true
   } catch (e) {}
-  if (!copyTemplate(projectPath, tplDir, projectName!)) {
+  if (!copyTemplate(projectPath, from, projectName!)) {
     return false
   }
 
   if (isGitRepo) {
-    execSync(`rm -rf ${tplDir}`, {
+    execSync(`rm -rf ${from}`, {
       stdio: 'inherit',
     })
   }
@@ -93,10 +101,7 @@ export const createFromGit = async (tplDir: string, projectName?: string, output
   if (canInstallModules && !(await installModules(projectPath, dependenciesAsString, devDependenciesAsString))) {
     return false
   }
-
-  const packageJson: { homepage: string; bugs: { url: string } } = await getOwnVersion()
-
-  printFooter(packageJson.homepage, projectPath, packageJson.bugs.url)
+  printFooter(projectPath)
 }
 
 const transformPackageDependenciesToStrings = (packageJson: any, key: string): Array<string> => {

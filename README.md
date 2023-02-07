@@ -23,7 +23,7 @@
 
 <h2 align="center">Example usage (CLI)</h2>
 
-`npx create-from-git git@github.com/jsheaven/template-for-libraries ./my-new-project MyNewProject`
+`npx create-from-git --from git@github.com/jsheaven/template-for-libraries --name MyNewProject`
 
 > You need at least version 18 of [Node.js](https://www.nodejs.org) installed.
 
@@ -41,8 +41,8 @@ import { createFromGit } from 'create-from-git'
 
 try {
   const statusReport = await createFromGit({
-    repositoryUrl: 'git@github.com/jsheaven/template-for-libraries',
-    targetDirectory: './my-new-project',
+    from: 'git@github.com/jsheaven/template-for-libraries',
+    to: '.',
     projectName: 'MyNewProject',
   })
 } catch (e) {
