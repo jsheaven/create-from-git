@@ -22,7 +22,7 @@ export const copyAndMaterializeFile = (options: CopyRenameReplaceFileOptions) =>
     .replace(TEMPLATE_UPPER_REGEX, options.concreteName)
     .replace(TEMPLATE_LOWER_REGEX, options.concreteName)
     .replace(TEMPLATE_UNDERSCORE_REGEX, options.concreteName)
-    .replace(TEMPLATE_LOWER_UPPER_REGEX, lcfirst(options.concreteName))
+    .replace(TEMPLATE_LOWER_UPPER_REGEX, lcfirst(options.concreteName).replace(/\-/g, ''))
     .replace(options.concreteName, camelToKebabCase(options.concreteName).toLocaleLowerCase())
 
   if (fileName[0] === '-') fileName = fileName.substring(1)
@@ -36,7 +36,7 @@ export const copyAndMaterializeFile = (options: CopyRenameReplaceFileOptions) =>
       .replace(TEMPLATE_LOWER_REGEX, options.concreteName.toLocaleLowerCase())
       .replace(TEMPLATE_DASH_LOWER_REGEX, options.concreteName.toLocaleLowerCase())
       .replace(TEMPLATE_UNDERSCORE_REGEX, options.concreteName.toLocaleLowerCase())
-      .replace(TEMPLATE_LOWER_UPPER_REGEX, lcfirst(options.concreteName))
+      .replace(TEMPLATE_LOWER_UPPER_REGEX, lcfirst(options.concreteName).replace(/\-/g, ''))
       .replace(TEMPLATE_UPPER_REGEX, kebabToCamelCase(options.concreteName))
 
     writeFileSync(newFilePath, programCode)
