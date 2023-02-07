@@ -21,7 +21,7 @@ export const copyAndMaterializeFile = (options: CopyRenameReplaceFileOptions) =>
 
   let fileName = relative(options.templateFolderPath, options.filePath)
     .replace(TEMPLATE_UPPER_REGEX, options.concreteName.replace(/\-/g, ''))
-    .replace(TEMPLATE_LOWER_REGEX, options.concreteName)
+    .replace(TEMPLATE_LOWER_REGEX, options.concreteName.replace(/\-/g, ''))
     .replace(TEMPLATE_UNDERSCORE_REGEX, options.concreteName)
     .replace(TEMPLATE_UPPER_UPPER_REGEX, options.concreteName.toLocaleUpperCase())
     .replace(TEMPLATE_LOWER_UPPER_REGEX, lcfirst(options.concreteName).replace(/\-/g, ''))
@@ -40,7 +40,7 @@ export const copyAndMaterializeFile = (options: CopyRenameReplaceFileOptions) =>
       .replace(TEMPLATE_UNDERSCORE_REGEX, options.concreteName.toLocaleLowerCase())
       .replace(TEMPLATE_UPPER_UPPER_REGEX, options.concreteName.toLocaleUpperCase())
       .replace(TEMPLATE_LOWER_UPPER_REGEX, lcfirst(options.concreteName).replace(/\-/g, ''))
-      .replace(TEMPLATE_UPPER_REGEX, kebabToCamelCase(options.concreteName))
+      .replace(TEMPLATE_UPPER_REGEX, kebabToCamelCase(options.concreteName).replace(/\-/g, ''))
 
     writeFileSync(newFilePath, programCode)
   } else {
