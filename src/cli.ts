@@ -5,6 +5,10 @@ import * as colors from 'kleur/colors'
 import yargs from 'yargs-parser'
 import { clean } from './clean'
 import { getPackageJson } from './file'
+import { resolve, parse } from 'path'
+import { fileURLToPath } from 'url'
+import { createFromGit } from './createFromGit'
+import { getOwnVersion } from './version'
 
 export type Arguments = yargs.Arguments
 
@@ -28,10 +32,12 @@ export interface CLIState {
 
 /** Determine which action the user requested */
 export const resolveArgs = (flags: Arguments): CLIState => {
+  console.log('flags', flags)
+
   const options: CLIState['options'] = {
     tpl: typeof flags.tpl === 'string' ? flags.tpl : undefined,
-    outputDirectory: typeof flags.outputDirectory === 'string' ? flags.outputDirectory : undefined,
-    projectName: typeof flags.projectName === 'string' ? flags.projectName : undefined,
+    outputDirectory: typeof flags.o === 'string' ? flags.o : undefined,
+    projectName: typeof flags.n === 'string' ? flags.n : undefined,
   }
 
   if (flags.version) {
@@ -78,11 +84,8 @@ const printHelp = () => {
 
 /** display --version flag */
 const printVersion = async () => {
-  // TODO: get install folder package.json
   console.log((await getOwnVersion()).version)
 }
-
-const getOwnVersion = async () => await getPackageJson('../package.json')
 
 export const callCleanCommand = async (outputDirectory: string) => {
   await clean(outputDirectory)
@@ -93,13 +96,6 @@ export const cli = async (args: string[]) => {
   const flags = yargs(args)
   const state = resolveArgs(flags)
   const options = { ...state.options }
-
-  try {
-    console.log('Have to do something', flags, 'state', state, 'options', options)
-  } catch (err) {
-    console.error(colors.red((err as any).toString() || err))
-    process.exit(1)
-  }
 
   console.log(
     colors.dim('>'),
@@ -118,12 +114,11 @@ export const cli = async (args: string[]) => {
       await printVersion()
       process.exit(0)
     }
-    case 'clean': {
+    case 'scaffold': {
       try {
-        // TODO: implement
-        await callCleanCommand('???')
-      } catch (err) {
-        throwAndExit(err)
+        await createFromGit(options.tpl, options.outputDirectory, options.projectName)
+      } catch (e) {
+        throwAndExit(e)
       }
       process.exit(0)
     }

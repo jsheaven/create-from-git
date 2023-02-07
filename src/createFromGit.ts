@@ -10,17 +10,14 @@ import { validateProjectDirectoryInput } from './validateProjectDirectoryInput'
 import { installModules } from './installModules'
 import { copyTemplate } from './copyTemplate'
 //import { fileURLToPath } from 'url'
+import { getOwnVersion } from './version'
 
 //const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /** creates a new project from a template named (default: examples/init), given a projectName */
-export const createFromGit = async (tplDir: string, destDir: string, projectName?: string) => {
+export const createFromGit = async (tplDir: string, projectName?: string, outputDir: string = '.') => {
   if (!tplDir) {
-    console.log(
-      colors.yellow(
-        '[??] FATAL: No template path/git repo specified. You can set it easily. Add: --tpl $pathToTplOrGitRepo',
-      ),
-    )
+    console.log(colors.yellow('[??] FATAL: No template path/git repo specified. Add: --tpl $pathToTplOrGitRepo'))
     process.exit(1)
   }
 
@@ -35,12 +32,12 @@ export const createFromGit = async (tplDir: string, destDir: string, projectName
 
   if (!projectName) {
     // get project directory name
-    const choiceProjectName = await inquirer.prompt([
+    const choiceProjectName = await inquirer.default.prompt([
       {
         type: 'input',
         name: 'projectName',
-        default: 'MyVanilProject',
-        message: `Please specify the project name (e.g. ${colors.cyan('MyVanilProject')}):`,
+        default: 'MyNewProject',
+        message: `Please specify the project name (e.g. ${colors.cyan('MyNewProject')}):`,
         validate: validateProjectDirectoryInput,
       },
     ])
@@ -48,16 +45,18 @@ export const createFromGit = async (tplDir: string, destDir: string, projectName
   }
 
   const projectPathName = projectName!.toLowerCase()
-  const projectPath = resolve(destDir, projectPathName)
+  const projectPath = resolve(outputDir, projectPathName)
   const folderAlreadyExist = existsSync(projectPath)
 
   if (folderAlreadyExist) {
-    const shouldOverride = await inquirer.prompt([
+    const shouldOverride = await inquirer.default.prompt([
       {
         type: 'confirm',
         default: false,
         name: 'answer',
-        message: colors.yellow('[??] WARN: The chosen directory already exists. Do you want to override it?'),
+        message: colors.yellow(
+          `[??] WARN: The output directory ${projectPath} already exists. Do you want to override it?`,
+        ),
       },
     ])
 
@@ -70,13 +69,17 @@ export const createFromGit = async (tplDir: string, destDir: string, projectName
     return false
   }
 
-  const packageJSON: { dependencies: any; devDependencies: any } = JSON.parse(
-    readFileSync(join(tplDir, 'package.json'), { encoding: 'utf8' }),
-  )
-
-  const dependenciesAsString: Array<string> = transformPackageDependenciesToStrings(packageJSON, 'dependencies')
-  const devDependenciesAsString: Array<string> = transformPackageDependenciesToStrings(packageJSON, 'devDependencies')
-
+  let dependenciesAsString: Array<string>
+  let devDependenciesAsString: Array<string>
+  let canInstallModules = false
+  try {
+    const packageJSON: { dependencies: any; devDependencies: any } = JSON.parse(
+      readFileSync(join(tplDir, 'package.json'), { encoding: 'utf8' }),
+    )
+    dependenciesAsString = transformPackageDependenciesToStrings(packageJSON, 'dependencies')
+    devDependenciesAsString = transformPackageDependenciesToStrings(packageJSON, 'devDependencies')
+    canInstallModules = true
+  } catch (e) {}
   if (!copyTemplate(projectPath, tplDir, projectName!)) {
     return false
   }
@@ -87,13 +90,12 @@ export const createFromGit = async (tplDir: string, destDir: string, projectName
     })
   }
 
-  if (!(await installModules(projectPath, dependenciesAsString, devDependenciesAsString))) {
+  if (canInstallModules && !(await installModules(projectPath, dependenciesAsString, devDependenciesAsString))) {
     return false
   }
 
-  const packageJson: { homepage: string; bugs: { url: string } } = JSON.parse(
-    readFileSync(resolve(__dirname, '../../package.json'), { encoding: 'utf8' }),
-  )
+  const packageJson: { homepage: string; bugs: { url: string } } = await getOwnVersion()
+
   printFooter(packageJson.homepage, projectPath, packageJson.bugs.url)
 }
 
