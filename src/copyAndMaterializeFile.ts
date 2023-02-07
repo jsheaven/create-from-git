@@ -7,6 +7,7 @@ const TEMPLATE_DASH_LOWER_REGEX = /template-name/g
 const TEMPLATE_UNDERSCORE_REGEX = /template_name/g
 const TEMPLATE_LOWER_UPPER_REGEX = /templateName/g
 const TEMPLATE_UPPER_REGEX = /TemplateName/g
+const TEMPLATE_UPPER_UPPER_REGEX = /TEMPLATE_NAME/g
 
 export interface CopyRenameReplaceFileOptions {
   filePath: string
@@ -19,9 +20,10 @@ export const copyAndMaterializeFile = (options: CopyRenameReplaceFileOptions) =>
   const lcfirst = (s: string) => s.replace(/^\w/, (c) => c.toLocaleLowerCase())
 
   let fileName = relative(options.templateFolderPath, options.filePath)
-    .replace(TEMPLATE_UPPER_REGEX, options.concreteName)
+    .replace(TEMPLATE_UPPER_REGEX, options.concreteName.replace(/\-/g, ''))
     .replace(TEMPLATE_LOWER_REGEX, options.concreteName)
     .replace(TEMPLATE_UNDERSCORE_REGEX, options.concreteName)
+    .replace(TEMPLATE_UPPER_UPPER_REGEX, options.concreteName.toLocaleUpperCase())
     .replace(TEMPLATE_LOWER_UPPER_REGEX, lcfirst(options.concreteName).replace(/\-/g, ''))
     .replace(options.concreteName, camelToKebabCase(options.concreteName).toLocaleLowerCase())
 
@@ -33,9 +35,10 @@ export const copyAndMaterializeFile = (options: CopyRenameReplaceFileOptions) =>
   // whitelist
   if (isProgramCodeFile(options.filePath)) {
     const programCode = readFileSync(options.filePath, { encoding: 'utf8' })
-      .replace(TEMPLATE_LOWER_REGEX, options.concreteName.toLocaleLowerCase())
+      .replace(TEMPLATE_LOWER_REGEX, options.concreteName.toLocaleLowerCase().replace(/\-/g, ''))
       .replace(TEMPLATE_DASH_LOWER_REGEX, options.concreteName.toLocaleLowerCase())
       .replace(TEMPLATE_UNDERSCORE_REGEX, options.concreteName.toLocaleLowerCase())
+      .replace(TEMPLATE_UPPER_UPPER_REGEX, options.concreteName.toLocaleUpperCase())
       .replace(TEMPLATE_LOWER_UPPER_REGEX, lcfirst(options.concreteName).replace(/\-/g, ''))
       .replace(TEMPLATE_UPPER_REGEX, kebabToCamelCase(options.concreteName))
 
