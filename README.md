@@ -23,7 +23,7 @@
 
 <h2 align="center">Example usage (CLI)</h2>
 
-`npx create-from-git --from git@github.com/jsheaven/template-for-libraries --name MyNewProject`
+`npx create-from-git@latest --from https://github.com/jsheaven/template-for-libraries --name MyNewProject`
 
 > You need at least version 18 of [Node.js](https://www.nodejs.org) installed.
 

@@ -93,6 +93,7 @@ export const createFromGit = async ({ from, to, projectName }: CreateFromGitConf
   }
 
   if (isGitRepo) {
+    // TODO: fix system independent
     execSync(`rm -rf ${from}`, {
       stdio: 'inherit',
     })
