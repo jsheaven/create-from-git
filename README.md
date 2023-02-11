@@ -29,12 +29,12 @@
 
 <h2 align="center">Example usage (API, as a library)</h2>
 
-<h3 align="center">Setup</h2>
+<h3 align="center">Setup</h3>
 
 - yarn: `yarn add create-from-git`
 - npm: `npm install create-from-git`
 
-<h3 align="center">ESM</h2>
+<h3 align="center">ESM</h3>
 
 ```ts
 import { createFromGit } from 'create-from-git'
@@ -50,7 +50,7 @@ try {
 }
 ```
 
-<h3 align="center">CommonJS</h2>
+<h3 align="center">CommonJS</h3>
 
 ```ts
 const { createFromGit } = require('create-from-git')
