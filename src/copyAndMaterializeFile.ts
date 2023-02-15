@@ -63,6 +63,8 @@ const PROGRAM_CODE_FILE_EXTENSIONS = [
   '.json5',
   '.md',
   '.mdx',
+  '.yml',
+  '.yaml',
 ]
 
 export const isProgramCodeFile = (fileName: string): boolean => {
